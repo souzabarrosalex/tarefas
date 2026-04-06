@@ -144,9 +144,41 @@ elif menu == "Criar Tarefa":
 elif menu == "Listar Tarefas":
     st.title("📋 Tarefas")
 
+    # 🔹 1. BUSCAR DADOS
     tasks = get_tasks()
 
+    # 🔹 2. CRIAR FILTROS (ANTES DE USAR)
+    st.subheader("🔎 Filtros")
+
+    col1, col2 = st.columns(2)
+
+    prioridade_filtro = col1.selectbox(
+        "Prioridade",
+        ["Todas", "Baixa", "Média", "Alta"]
+    )
+
+    busca = col2.text_input("Buscar tarefa")
+    # 🔹 3. APLICAR FILTROS
+    tasks_filtradas = []
+
     for t in tasks:
+        # 🚫 IGNORA CONCLUÍDAS
+        if t[6] == "Concluída":
+            continue
+
+        # prioridade
+        if prioridade_filtro != "Todas" and t[5] != prioridade_filtro:
+            continue
+
+        # busca
+        if busca and busca.lower() not in t[1].lower():
+            continue
+
+        tasks_filtradas.append(t)
+        
+    # 🔹 4. MOSTRAR RESULTADOS
+    for i, t in enumerate(tasks_filtradas):
+        st.subheader(t[1])
         with st.container():
             st.subheader(f"{t[1]} ({t[5]})")
 
@@ -163,7 +195,7 @@ elif menu == "Listar Tarefas":
                 "Status",
                 ["Pendente", "Em andamento", "Concluída"],
                 index=["Pendente", "Em andamento", "Concluída"].index(t[6]),
-                key=f"status_{t[0]}"
+                key=f"status_{i}_{t[0]}"
             )
 
             if novo_status != t[6]:
